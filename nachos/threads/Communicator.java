@@ -27,6 +27,16 @@ public class Communicator {
      * @param	word	the integer to transfer.
      */
     public void speak(int word) {
+    	// Getting the lock
+    	lock.acquire();
+    	// Increasing number of Speakers
+    	speakerCount++;
+    	//Wait for thread to listen through for this communicator
+    	if (listenerCount < 1)
+    		cSpeaker.sleep();
+    	//Transfer word to listener
+    	this.word = word;
+    	
     }
 
     /**
@@ -36,6 +46,15 @@ public class Communicator {
      * @return	the integer transferred.
      */    
     public int listen() {
-	return 0;
+    	// Wait for thread to speak then return word that is passed.
+    	lock.acquire();
+    	listenerCount++;
+    	while(this.word == 0) {
+    		cSpeaker.notify();
+    		cListener.sleep();
+    	}
+    	listenerCount--;
+    	lock.release();
+	return this.word;
     }
 }
