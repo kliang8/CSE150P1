@@ -36,7 +36,7 @@ public class Communicator {
     		cSpeaker.sleep();
     	//Transfer word to listener
     	this.word = word;
-    	
+    	lock.release();
     }
 
     /**
@@ -47,14 +47,16 @@ public class Communicator {
      */    
     public int listen() {
     	// Wait for thread to speak then return word that is passed.
+    	int msg;
     	lock.acquire();
     	listenerCount++;
     	while(this.word == 0) {
     		cSpeaker.notify();
     		cListener.sleep();
     	}
+    	msg = this.word;
     	listenerCount--;
     	lock.release();
-	return this.word;
+	return msg;
     }
 }
