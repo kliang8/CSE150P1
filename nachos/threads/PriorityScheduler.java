@@ -2,6 +2,7 @@ package nachos.threads;
 
 import nachos.machine.*;
 
+import java.util.LinkedList;
 import java.util.TreeSet;
 import java.util.HashSet;
 import java.util.Iterator;
@@ -273,6 +274,8 @@ public class PriorityScheduler extends Scheduler {
 	/** The priority of the associated thread. */
 	protected int priority;
 	
-	protected HashSet<ThreadState> waitingQueue = new HashSet<ThreadState>();
     }
+    
+	protected LinkedList<ThreadState> waitingQueue = new LinkedList<ThreadState>();
+
 }
