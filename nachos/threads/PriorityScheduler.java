@@ -138,7 +138,8 @@ public class PriorityScheduler extends Scheduler {
 
 	public void acquire(KThread thread) {
 	    Lib.assertTrue(Machine.interrupt().disabled());
-	    getThreadState(thread).acquire(this);
+	    getThre
+	    adState(thread).acquire(this);
 	}
 
 	public KThread nextThread() {
@@ -219,8 +220,27 @@ public class PriorityScheduler extends Scheduler {
 	 * @return	the effective priority of the associated thread.
 	 */
 	public int getEffectivePriority() {
-	    // implement me
-	    return priority;
+	    // implement me -- Might be completed vague pseudocode
+		// getEffectivePriority() gets called if a  lower priority thread aquires a lock.
+		
+		// Priorities are ints
+		int effectivePriority;
+		int firstPriority = 0;
+		int secondPriority = 0;
+		
+		// Loop through Linked list and find top 2 Priorities
+		for (ThreadState tState: waitingQueue) {
+			if (tState.priority > firstPriority)
+				firstPriority = tState.priority;
+			else if (firstPriority > tState.priority > secondPriority)
+				secondPriority = tState.priority;
+		}
+		
+		// The difference between the 1st  and 2nd priority is given to the lower priority 
+		effectivePriority = this.priority + (firstPriority - secondPriority);		
+		
+		// returns sum of lower priority value and higher priority donation value.
+	    return effectivePriority;
 	}
 
 	/**
