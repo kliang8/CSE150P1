@@ -10,10 +10,19 @@ import nachos.machine.*;
  * threads can be paired off at this point.
  */
 public class Communicator {
+	private int listenerCount, speakerCount, word = 0;
+	private boolean wordFlag;
+	private Condition cSpeaker, cListener;
+	private Lock lock;
     /**
      * Allocate a new communicator.
      */
     public Communicator() {
+    	lock = new Lock();
+    	cSpeaker = new Condition(lock);
+    	cListener = new Condition(lock);
+    	wordFlag = false;
+    	
     }
 
     /**
@@ -32,10 +41,12 @@ public class Communicator {
     	// Increasing number of Speakers
     	speakerCount++;
     	//Wait for thread to listen through for this communicator
-    	if (listenerCount < 1)
+    	while(wordFlag || listenerCount < 1)
     		cSpeaker.sleep();
     	//Transfer word to listener
     	this.word = word;
+    	wordFlag = true;
+    	speakerCount--;
     	lock.release();
     }
 
@@ -50,11 +61,12 @@ public class Communicator {
     	int msg;
     	lock.acquire();
     	listenerCount++;
-    	while(this.word == 0) {
-    		cSpeaker.notify();
+    	while(wordFlag = false) {
+    		cSpeaker.wakeAll();
     		cListener.sleep();
     	}
     	msg = this.word;
+    	wordFlag = false;
     	listenerCount--;
     	lock.release();
 	return msg;
