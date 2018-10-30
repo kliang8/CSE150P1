@@ -268,7 +268,7 @@ public class PriorityScheduler extends Scheduler {
 	 */
 	public int getEffectivePriority() {
 	    // implement me -- Check!!! 
-		// getEffectivePriority() gets called if a  lower priority thread aquires a lock.
+		// getEffectivePriority() gets called if a lower priority thread acquires a lock.
 		
 		// Priorities are ints
 		int effectivePriority;
@@ -283,7 +283,7 @@ public class PriorityScheduler extends Scheduler {
 				secondPriority = tState.priority;
 		}
 		
-		// The difference between the 1st  and 2nd priority is given to the lower priority 
+		// The difference between the 1st and 2nd priority is given to the lower priority 
 		effectivePriority = this.priority + (firstPriority - secondPriority);		
 		
 		// returns sum of lower priority value and higher priority donation value.
@@ -301,7 +301,8 @@ public class PriorityScheduler extends Scheduler {
 	    
 	    this.priority = priority;
 	    
-	    // implement me   
+	    // implement me
+	    
 	}
 
 	/**
@@ -319,8 +320,8 @@ public class PriorityScheduler extends Scheduler {
 	public void waitForAccess(PriorityQueue waitQueue) {
 	    // implement me
 		// RR does something like this
-				Lib.assertTrue(Machine.interrupt().disabled());
-				waitQueue.waitQueue.add(thread);
+		Lib.assertTrue(Machine.interrupt().disabled());
+		waitQueue.waitQueue.add(thread);
 
 	}
 
@@ -335,7 +336,10 @@ public class PriorityScheduler extends Scheduler {
 	 * @see	nachos.threads.ThreadQueue#nextThread
 	 */
 	public void acquire(PriorityQueue waitQueue) {
-	    // implement me
+	    // implement me --- check
+		Lib.assertTrue(Machine.interrupt().disabled());
+		waitQueue.waitQueue.remove(thread);
+		
 	}	
 
 	/** The thread with which this object is associated. */	   
