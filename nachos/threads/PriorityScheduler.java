@@ -127,61 +127,106 @@ public class PriorityScheduler extends Scheduler {
      * A <tt>ThreadQueue</tt> that sorts threads by priority.
      */
     protected class PriorityQueue extends ThreadQueue {
-	PriorityQueue(boolean transferPriority) {
-	    this.transferPriority = transferPriority;
-	}
-
-	public void waitForAccess(KThread thread) {
-	    Lib.assertTrue(Machine.interrupt().disabled());
-	    getThreadState(thread).waitForAccess(this);
-	}
-
-	public void acquire(KThread thread) {
-	    Lib.assertTrue(Machine.interrupt().disabled());
-	    getThreadState(thread).acquire(this);
-	}
-
-	public KThread nextThread() {
-	    Lib.assertTrue(Machine.interrupt().disabled());
-	    // implement me
-	    
-	    ThreadState nextState = pickNextThread();
-	    
-	    if (nextState != null) {
-	    	return nextState.thread;
-	    }
-	    else {
-	    	return null;
-	    }
-	    
-	}
-
-	/**
-	 * Return the next thread that <tt>nextThread()</tt> would return,
-	 * without modifying the state of this queue.
-	 *
-	 * @return	the next thread that <tt>nextThread()</tt> would
-	 *		return.
-	 */
-	protected ThreadState pickNextThread() {
-	    // implement me
-		
-		ThreadState threadState = waitingQueue.peek();
-		
-		
-	    return null;
-	}
+		PriorityQueue(boolean transferPriority) {
+		    this.transferPriority = transferPriority;
+		}
 	
-	public void print() {
-	    Lib.assertTrue(Machine.interrupt().disabled());
-	    // implement me (if you want)
-	}
+		public void waitForAccess(KThread thread) {
+		    Lib.assertTrue(Machine.interrupt().disabled());
+		    getThreadState(thread).waitForAccess(this);
+		}
+	
+		public void acquire(KThread thread) {
+		    Lib.assertTrue(Machine.interrupt().disabled());
+		    getThreadState(thread).acquire(this);
+		}
+		
+		public KThread nextThread() {
+		    Lib.assertTrue(Machine.interrupt().disabled());
+		    // implement me
+		    
+		    // Found in RoundRobinScheduler
+		    if (waitQueue.isEmpty())
+				return null;
+	    
+		    // Found in RoundRobinScheduler
+			return (KThread) waitQueue.removeFirst();
+			
+			// Included in Original Code
+		    // return null;
+		}
+	
+		/**
+		 * Return the next thread that <tt>nextThread()</tt> would return,
+		 * without modifying the state of this queue.
+		 *
+		 * @return	the next thread that <tt>nextThread()</tt> would
+		 *		return.
+		 */
+		
+		// Returns next thread without removing from queue
+		protected ThreadState pickNextThread() {
+		    // implement me
+		    
+			// Found in RoundRobinScheduler
+		    if (waitQueue.isEmpty())
+				return null;
 
-	/**
-	 * <tt>true</tt> if this queue should transfer priority from waiting
-	 * threads to the owning thread.
-	 */
-	public boolean transferPriority;
+		    // Adapted From PrioirtyScheduler: public KThread nextThread()
+			return  getThreadState((KThread) waitQueue.getFirst());
+			
+			// Included in Original Code
+		    // return null;
+		}
+		
+		public void print() {
+		    Lib.assertTrue(Machine.interrupt().disabled());
+		    // implement me (if you want)
+		}
+	
+		/**
+		 * <tt>true</tt> if this queue should transfer priority from waiting
+		 * threads to the owning thread.
+		 */
+		public boolean transferPriority;
+		
+		// Added Functions
+		
+		public void sort() {
+			// Create new list
+			// Add in correct order to new list
+			// Set current list to new list
+			
+			if (waitQueue.isEmpty()) {
+				return;
+			}
+			
+			LinkedList<KThread> newWaitQueue = new LinkedList<KThread>();
+
+			ThreadState maxPriorityThreadState = getThreadState(waitQueue.get(0));
+			
+			for(int i = 0; i < waitQueue.size(); i++) {
+				for(int j = 1; j < waitQueue.size(); j++) {
+					if ( getThreadState(waitQueue.get(i)).getEffectivePriority() > getThreadState(waitQueue.get(j)).getEffectivePriority() ) {
+						maxPriorityThreadState = getThreadState(waitQueue.get(i));                                                                                                                                                                                                                       
+					}
+						
+				}
+			}
+			
+			//int priority = 0;
+			//priority = getThreadState(waitQueue.get(i)).getEffectivePriority();
+			
+			
+			//waitQueue = newWaitQueue;
+			
+		}
+		
+		
+		// Added Variables
+		
+		// Added waitQueue (found in RoundRobinScheduler)
+		private LinkedList<KThread> waitQueue = new LinkedList<KThread>();
     }
 
     /**
@@ -200,6 +245,9 @@ public class PriorityScheduler extends Scheduler {
 	 */
 	public ThreadState(KThread thread) {
 	    this.thread = thread;
+	    
+	    // Added threadAge to Constructor
+	    this.threadAge = Machine.timer().getTime();
 	    
 	    setPriority(priorityDefault);
 	}
@@ -231,7 +279,7 @@ public class PriorityScheduler extends Scheduler {
 		for (ThreadState tState: waitingQueue) {
 			if (tState.priority > firstPriority)
 				firstPriority = tState.priority;
-			else if (firstPriority > tState.priority > secondPriority)
+			else if (firstPriority > tState.priority && tState.priority > secondPriority)
 				secondPriority = tState.priority;
 		}
 		
@@ -270,7 +318,10 @@ public class PriorityScheduler extends Scheduler {
 	 */
 	public void waitForAccess(PriorityQueue waitQueue) {
 	    // implement me
-		Lib.assertTrue(Machine.interrupt().disabled());
+		// RR does something like this
+				Lib.assertTrue(Machine.interrupt().disabled());
+				waitQueue.waitQueue.add(thread);
+
 	}
 
 	/**
@@ -285,13 +336,22 @@ public class PriorityScheduler extends Scheduler {
 	 */
 	public void acquire(PriorityQueue waitQueue) {
 	    // implement me
-		Lib.assertTrue(Machine.interrupt().disabled());
 	}	
 
 	/** The thread with which this object is associated. */	   
 	protected KThread thread;
 	/** The priority of the associated thread. */
 	protected int priority;
+	
+	// Added Variables
+	
+		// To know what waitQueue the thread is on
+		// private LinkedList<KThread> waitQueue = new LinkedList<KThread>();
+		
+		
+		// Added threadAge to indicate how long a thread has been waiting
+		public long threadAge;
+
 	
     }
     
