@@ -67,7 +67,7 @@ public class Boat
 		sleepOahuAdult = new Condition2(adultLock);
 		sleepOahuChild = new Condition2(childLock);
 		sleepMolokaiChild = new Condition2(molokaiLock);
-		sleepOnBoat = = new Condition2(boatLock);
+		sleepOnBoat = new Condition2(boatLock);
 		
 		Semaphore finish = new Semaphore(0);
 		
@@ -99,13 +99,13 @@ public class Boat
 		finish.P();
     }
 
-    static void AdultItinerary()
+    static void adultItinerary()
     {
 		//Adult threads do not need a onMolokai check, because their threads end when they are on Molokai
 		//boolean onMolokai = false;
 		
 		//only one adult will be awake at a time, this is due to that adults are what wake children
-		adultLock.aquire()
+		adultLock.acquire();
 		//don't go to Molokai yet if the boat isn't there or if a child isn't on Molokai
 		while(boatMolokai || !adultTurn)
 		{
@@ -133,7 +133,7 @@ public class Boat
 		adultLock.release();
     }
 
-    static void ChildItinerary()
+    static void childItinerary()
     {
 		//INITIALIZATION
 		boolean onMolokai = false;
@@ -147,7 +147,7 @@ public class Boat
 			{
 				//if the boat isn't there or if an adult is going to use the boat next,
 				//then the child should sleep. No more than two children should ever be active
-				childLock.aquire();
+				childLock.acquire();
 				while(boatMolokai || adultTurn || countActiveChildren >= 2)
 				{
 					sleepOahuChild.sleep();
@@ -157,10 +157,10 @@ public class Boat
 				
 				//If there are only 2 children left on the island, then this is the final voyage
 				//This check is done before sailing, to simulate only information known to people on the island
-				if(countOahuChild <= 2 && countOahuAdults <= 0)
+				if(countOahuChild <= 2 && countOahuAdult <= 0)
 					finalVoyage = true;
 				
-				boatlock.aquire();
+				boatLock.acquire();
 				//If there are zero children waiting on the boat...
 				if(countBoat == 0)
 				{
@@ -191,7 +191,7 @@ public class Boat
 				
 				//If there are still adults on the island, then they will take the boat next
 				if(countOahuAdult > 0)
-						adultTurn=true
+						adultTurn=true;
 				
 				//Set counters and send messages that the two boat children are now in Molokai
 				countOahuChild--;
@@ -208,7 +208,7 @@ public class Boat
 				
 				//if the child is the last one off the boat, they will instead return back to Oahu
 				//otherwise they will sleep
-				molokaiLock.aquire();
+				molokaiLock.acquire();
 				countBoat--;
 				if(countBoat > 0)	
 				{
