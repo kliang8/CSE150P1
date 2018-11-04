@@ -86,14 +86,14 @@ public class Boat
 		for(int i = 0; i < adults; i++)
 		{
 			KThread t = new KThread(a);
-			t.setName("Adult Thread");
+			t.setName("Adult Thread" + i);
 			t.fork();
 		}
 		
 		for(int i = 0; i < children; i++)
 		{
 			KThread t = new KThread(c);
-			t.setName("Child Thread");
+			t.setName("Child Thread" + i);
 			t.fork();
 		}
 		finish.P();
