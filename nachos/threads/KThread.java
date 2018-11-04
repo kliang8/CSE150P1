@@ -290,8 +290,8 @@ public class KThread {
     	// readyQueue.acquire(this);
         // readyQueue.waitForAccess(this);
     	ThreadQueue threadQueue = ThreadedKernel.scheduler.newThreadQueue(true);
+	threadQueue.waitForAccess(this);
     	threadQueue.acquire(this);
-    	threadQueue.waitForAccess(this);
     	currentThread.sleep();	
 	}
 	Machine.interrupt().restore(intStatus);
