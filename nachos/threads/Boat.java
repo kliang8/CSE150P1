@@ -86,14 +86,14 @@ public class Boat
 		for(int i = 0; i < adults; i++)
 		{
 			KThread t = new KThread(a);
-			t.setName("Sample Boat Thread");
+			t.setName("Adult Thread");
 			t.fork();
 		}
 		
 		for(int i = 0; i < children; i++)
 		{
 			KThread t = new KThread(c);
-			t.setName("Sample Boat Thread");
+			t.setName("Child Thread");
 			t.fork();
 		}
 		finish.P();
@@ -161,23 +161,12 @@ public class Boat
 					finalVoyage = true;
 				
 				boatLock.acquire();
-				//If there are zero children waiting on the boat...
+				//If there are zero children waiting on the boat, wait on the boat and sleep
 				if(countBoat == 0)
 				{
-					//If the not the final child, wait on the boat and sleep
-					if(countOahuChild > 1)
-					{
-						countBoat++;
-						sleepOnBoat.sleep();
-					}
-					//If the final Child on the island, just row and finish the simulation
-					else
-					{
-						bg.ChildRowToMolokai();
-						boatLock.release();
-						finish.V();
-						break;
-					}
+					//Always will wait for a passenger, because there will always be 2 or more children
+					countBoat++;
+					sleepOnBoat.sleep();
 				}
 				//If the second child on the boat, the child is now the passenger
 				//Wake the child that was waiting for a passenger
