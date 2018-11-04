@@ -25,7 +25,10 @@ public class Condition2 {
      */
     public Condition2(Lock conditionLock) {
 	this.conditionLock = conditionLock;
+ 
     }
+    
+    
 
     /**
      * Atomically release the associated lock and go to sleep on this condition
@@ -33,43 +36,42 @@ public class Condition2 {
      * current thread must hold the associated lock. The thread will
      * automatically reacquire the lock before <tt>sleep()</tt> returns.
      */
-    public void sleep() {
-	Lib.assertTrue(conditionLock.isHeldByCurrentThread());
-	conditionLock.release(); // Release lock
-	boolean tmp = Machine.interrupt().disable(); // Disable interrupts 
-	waitQueue.add(Kthread.currentThread()); // Add currentThread to waitQueue
-	KThread.currentThread().sleep(); // Put currentThread to sleep
-	Machine.interrupt().restore(tmp); // Restore interrupts
-	conditionLock.acquire(); // Acquire lock
-    }
 
+    public void sleep() {
+        Lib.assertTrue(conditionLock.isHeldByCurrentThread());
+        conditionLock.release();// Release lock
+        boolean tmp = Machine.interrupt().disable();// Disable interrupts 
+        waitQueue.add(KThread.currentThread()); // Add currentThread to waitQueue
+        KThread.currentThread().sleep(); // Put currentThread to sleep
+        Machine.interrupt().restore(tmp);// Restore interrupts
+        conditionLock.acquire();// Acquire lock
+    }
     /**
      * Wake up at most one thread sleeping on this condition variable. The
      * current thread must hold the associated lock.
      */
     public void wake() {
-	Lib.assertTrue(conditionLock.isHeldByCurrentThread());
-	boolean tmp = Machine.interrupt().disable(); // Disable interrupts
-	if (!waitQueue.isEmpty()) { // If waitQueue is not empty
-		KThread tmpThread = waitQueue.removeFirst(); // Get the first Thread in wait Queue
-		tmpThread.ready(); // Ready the thread
-	}
-	Machine.interrupt().restore(tmp); // Restore interrupts
-		
-	}
-	
+        Lib.assertTrue(conditionLock.isHeldByCurrentThread());
+        boolean tmp = Machine.interrupt().disable();/// Disable interrupts
+        if(!waitQueue.isEmpty()){ // If waitQueue is not empty
+            KThread tmp = waitQueue.removeFirst();// Get the first Thread in wait Queue
+            tmp.ready(); // Ready the thread
+        }
+        Machine.interrupt().restore(tmp);// Restore interrupts
+    }
 
     /**
      * Wake up all threads sleeping on this condition variable. The current
      * thread must hold the associated lock.
      */
+    
     public void wakeAll() {
-	Lib.assertTrue(conditionLock.isHeldByCurrentThread());
-	while(!waitQueue.isEmpty) { // While waitQueue is not empty
-		wake(); // Wake up all thread
-	}
-	
+        Lib.assertTrue(conditionLock.isHeldByCurrentThread());
+        while(waitQueue != null)// While waitQueue is not empty
+            wake(); // Wake all asleep threads
     }
+
+
     private LinkedList<KThread> waitQueue = new LinkedList<KThread>(); // A link-list to store all the thread that are asleep
     private Lock conditionLock;
 }
