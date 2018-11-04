@@ -1,7 +1,9 @@
 package nachos.threads;
 
 import nachos.machine.*;
-import java.util.*;
+
+import java.util.LinkedList;
+import java.util.Iterator;
 
 /**
  * An implementation of condition variables that disables interrupt()s for
