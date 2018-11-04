@@ -54,8 +54,8 @@ public class Condition2 {
         Lib.assertTrue(conditionLock.isHeldByCurrentThread());
         boolean tmp = Machine.interrupt().disable();/// Disable interrupts
         if(!waitQueue.isEmpty()){ // If waitQueue is not empty
-            KThread tmp = waitQueue.removeFirst();// Get the first Thread in wait Queue
-            tmp.ready(); // Ready the thread
+            KThread x = waitQueue.removeFirst();// Get the first Thread in wait Queue
+            x.ready(); // Ready the thread
         }
         Machine.interrupt().restore(tmp);// Restore interrupts
     }
