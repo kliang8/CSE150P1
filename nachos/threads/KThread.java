@@ -194,6 +194,15 @@ public class KThread {
 
 	currentThread.status = statusFinished;
 	
+	// Added handling of the join queue (introduced for KThread.join())
+	// If the current thread has a join queue and the join queue has a thread on it,
+	// ready that thread
+	
+	if (currentThread.joinQueue != null && currentThread.joinQueue.nextThread() != null) {
+		currentThread.joinQueue.nextThread().ready();
+	}
+	    
+	    
 	sleep();
     }
 
@@ -283,17 +292,14 @@ public class KThread {
 	// Ensure that interrupts are disabled
 	Lib.assertTrue(Machine.interrupt().disabled());
 	
+	// If this thread isn't finished
 	if (this.status != statusFinished) {
-    	// Ready Queue is also available however a separate queue is used
-    	// to acquire and set up this thread for execution, to avoid
-    	// undesired behavior caused by manipulating the Ready Queue
-    	// readyQueue.acquire(this);
-        // readyQueue.waitForAccess(this);
-    	ThreadQueue threadQueue = ThreadedKernel.scheduler.newThreadQueue(true);
-	threadQueue.waitForAccess(this);
-    	threadQueue.acquire(this);
-    	currentThread.sleep();	
+		// Add the current thread to a join queue
+    	joinQueue.waitForAccess(currentThread);
+    	// Put the current thread to sleep
+    	sleep();	
 	}
+	// Restore state before interrupt
 	Machine.interrupt().restore(intStatus);
 
     }
