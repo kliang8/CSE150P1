@@ -274,9 +274,8 @@ public class KThread {
      */
     public void join() {
 	Lib.debug(dbgThread, "Joining to thread: " + toString());
-
 	Lib.assertTrue(this != currentThread);
-	
+
 	// Disable interrupts and acquire the machine status, 
 	// so the machine state can be restored after the join operation
 	boolean intStatus = Machine.interrupt().disable();
@@ -284,18 +283,16 @@ public class KThread {
 	// Ensure that interrupts are disabled
 	Lib.assertTrue(Machine.interrupt().disabled());
 	
-	if (this.status == statusFinished) {
-	
-    	} else {
+	if (this.status != statusFinished) {
     	// Ready Queue is also available however a separate queue is used
     	// to acquire and set up this thread for execution, to avoid
     	// undesired behavior caused by manipulating the Ready Queue
     	// readyQueue.acquire(this);
         // readyQueue.waitForAccess(this);
-    		ThreadQueue threadQueue = ThreadedKernel.scheduler.newThreadQueue(true);
-    		threadQueue.acquire(this);
-    		threadQueue.waitForAccess(this);
-    		currentThread.sleep();	
+    	ThreadQueue threadQueue = ThreadedKernel.scheduler.newThreadQueue(true);
+    	threadQueue.acquire(this);
+    	threadQueue.waitForAccess(this);
+    	currentThread.sleep();	
 	}
 	Machine.interrupt().restore(intStatus);
 
