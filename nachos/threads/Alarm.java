@@ -101,8 +101,17 @@ public class Alarm {
 		
 		public int compareTo(SleepingThread other)
 		{
-			return Long.compare(wakeTime, other.getWakeTime());
-		}
+				if(wakeTime == other.getWakeTime())
+				{
+					return 0;
+				}else if(wakeTime > other.getWakeTime())
+				{
+					return 1;		
+				}else
+				{
+					return -1;		
+				}	
+			}
 	}
 	
 }
