@@ -10,10 +10,24 @@ import nachos.machine.*;
  * threads can be paired off at this point.
  */
 public class Communicator {
+
+        private Lock lock;
+
+        private Condition2 cSpeaker;
+        private Condition2 cListener;
+
+        private int speakerCount = 0;
+        private int listenerCount = 0;
+
+        private int word = 0;
+
     /**
      * Allocate a new communicator.
      */
     public Communicator() {
+           lock = new Lock();
+           cSpeaker =  new  Condition2(lock);
+           cListener =  new  Condition2(lock);
     }
 
     /**
@@ -36,6 +50,8 @@ public class Communicator {
     		cSpeaker.sleep();
     	//Transfer word to listener
     	this.word = word;
+        cListener.wakeAll()
+        speakerCount--;
     	lock.release();
     }
 
@@ -44,7 +60,7 @@ public class Communicator {
      * the <i>word</i> that thread passed to <tt>speak()</tt>.
      *
      * @return	the integer transferred.
-     */    
+     */
     public int listen() {
     	// Wait for thread to speak then return word that is passed.
     	int msg;
@@ -55,6 +71,7 @@ public class Communicator {
     		cListener.sleep();
     	}
     	msg = this.word;
+        this.word = 0;
     	listenerCount--;
     	lock.release();
 	return msg;
