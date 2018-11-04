@@ -45,8 +45,8 @@ public class Communicator {
     	lock.acquire();
     	// Increasing number of Speakers
     	speakerCount++;
-    	//Wait for thread to listen through for this communicator
-    	if (listenerCount < 1)
+    	//Wait for thread to listen for this communicator
+    	while (this.word != 0 &&  listenerCount < 1)
     		cSpeaker.sleep();
     	//Transfer word to listener
     	this.word = word;
