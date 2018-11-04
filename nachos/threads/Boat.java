@@ -170,6 +170,7 @@ public class Boat
 				{
 					//Always will wait for a passenger, because there will always be 2 or more children
 					countBoat++;
+					sleepOahuChild.wake();
 					sleepOnBoat.sleep();
 				}
 				//If the second child on the boat, the child is now the passenger
@@ -239,8 +240,6 @@ public class Boat
 					sleepOahuAdult.wake();
 					sleepOahuChild.sleep();
 				}
-				else
-					sleepOahuChild.wake();
 			}
 		}
     }
