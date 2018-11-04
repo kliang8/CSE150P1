@@ -139,6 +139,7 @@ public class Boat
 		boolean onMolokai = false;
 		boolean finalVoyage = false;
 		boolean passenger;
+		boolean adultsFinished = false;
 		
 		while(true)
 		{
@@ -159,6 +160,9 @@ public class Boat
 				//This check is done before sailing, to simulate only information known to people on the island
 				if(countOahuChild <= 2 && countOahuAdult <= 0)
 					finalVoyage = true;
+				//Also check for if any adults left
+				if(countOahuAdult <= 0)
+					adultsFinished = true;
 				
 				boatLock.acquire();
 				//If there are zero children waiting on the boat, wait on the boat and sleep
@@ -179,7 +183,7 @@ public class Boat
 				boatLock.release();
 				
 				//If there are still adults on the island, then they will take the boat next
-				if(countOahuAdult > 0)
+				if(!adultsFinished)
 						adultTurn=true;
 				
 				//Set counters and send messages that the two boat children are now in Molokai
@@ -201,6 +205,11 @@ public class Boat
 				countBoat--;
 				if(countBoat > 0)	
 				{
+					if(adultsFinished)
+					{
+						molokaiLock.release();
+						break;
+					}			
 					sleepMolokaiChild.sleep();
 				}
 				molokaiLock.release();
