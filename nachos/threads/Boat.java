@@ -93,7 +93,7 @@ public class Boat
 			t.setName("Child Thread" + i);
 			t.fork();
 		}
-		finish.P();
+		finishTest.P();
     }
 
     static void adultItinerary()
