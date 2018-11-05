@@ -328,7 +328,7 @@ public class PriorityScheduler extends Scheduler {
 				}
 				// Donate priority to the longest waiting thread
 				if (getThreadState(waitQueue.waitQueue.get(maxWaitTimeIndex)).getPriority() != priorityMaximum) {
-	 				getThreadState(waitQueue.waitQueue.get(maxWaitTimeIndex)).setPriority(getThreadState((waitQueue.waitQueue.get(maxWaitTimeIndex))).getPriority()+1);
+					getThreadState(waitQueue.waitQueue.get(maxWaitTimeIndex)).setPriority(getThreadState(thread).getPriority());
 	 			}
 			}
 		}
