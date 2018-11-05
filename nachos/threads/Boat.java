@@ -1,6 +1,3 @@
-package nachos.threads;
-import nachos.ag.BoatGrader;
-
 public class Boat
 {
     static BoatGrader bg;
@@ -27,24 +24,27 @@ public class Boat
     
     public static void selfTest()
     {
-	BoatGrader b = new BoatGrader();
-	
-	System.out.println("\n ***Testing Boats with only 2 children***");
-	begin(0, 2, b);
-
-//	System.out.println("\n ***Testing Boats with 2 children, 1 adult***");
-//  	begin(1, 2, b);
-
-//  	System.out.println("\n ***Testing Boats with 3 children, 3 adults***");
-//  	begin(3, 3, b);
-    }
-
+@@ -21,51 +41,209 @@ public static void selfTest()
     public static void begin( int adults, int children, BoatGrader b )
     {
+	// Store the externally generated autograder in a class
+	// variable to be accessible by children.
+	bg = b;
+	// Instantiate global variables here
+	
+	// Create threads here. See section 3.4 of the Nachos for Java
+	// Walkthrough linked from the projects page.
+	Runnable r = new Runnable() {
+	    public void run() {
+                SampleItinerary();
+            }
+        };
+        KThread t = new KThread(r);
+        t.setName("Sample Boat Thread");
+        t.fork();
 		// Store the externally generated autograder in a class
 		// variable to be accessible by children.
 		bg = b;
-
 		// Instantiate global variables here
 		
 		// Create threads here. See section 3.4 of the Nachos for Java
@@ -67,7 +67,7 @@ public class Boat
 		sleepOahuAdult = new Condition2(adultLock);
 		sleepOahuChild = new Condition2(childLock);
 		sleepMolokaiChild = new Condition2(molokaiLock);
-		sleepOnBoat = new Condition2(boatLock);
+		sleepOnBoat = = new Condition2(boatLock);
 		
 		Semaphore finish = new Semaphore(0);
 		
@@ -86,26 +86,32 @@ public class Boat
 		for(int i = 0; i < adults; i++)
 		{
 			KThread t = new KThread(a);
-			t.setName("Adult Thread" + i);
+			t.setName("Sample Boat Thread");
 			t.fork();
 		}
 		
 		for(int i = 0; i < children; i++)
 		{
 			KThread t = new KThread(c);
-			t.setName("Child Thread" + i);
+			t.setName("Sample Boat Thread");
 			t.fork();
 		}
 		finish.P();
     }
-
-    static void adultItinerary()
+    static void AdultItinerary()
     {
+	/* This is where you should put your solutions. Make calls
+	   to the BoatGrader to show that it is synchronized. For
+	   example:
+	       bg.AdultRowToMolokai();
+	   indicates that an adult has rowed the boat across to Molokai
+	*/
+    }
 		//Adult threads do not need a onMolokai check, because their threads end when they are on Molokai
 		//boolean onMolokai = false;
 		
 		//only one adult will be awake at a time, this is due to that adults are what wake children
-		adultLock.acquire();
+		adultLock.aquire()
 		//don't go to Molokai yet if the boat isn't there or if a child isn't on Molokai
 		while(boatMolokai || !adultTurn)
 		{
@@ -114,41 +120,50 @@ public class Boat
 			if(!boatMolokai && !adultTurn)
 			{
 				sleepOahuChild.wake();
+				sleepOahuChild.wake();
 			}*/
 			sleepOahuAdult.sleep();
 		}
 		//Adult rows to Molokai
-
+    static void ChildItinerary()
+    {
 		//The adults will know that there are no longer any children on Molokai, 
 		//as the returning boat is the second child
-		childLock.acquire(); // locked as
-		adultTurn = false;
-		boatMolokai = true;
-		childLock.release();
+		adultTurn = false; 
 		
 		countOahuAdult--;
-		
+		boatMolokai = true;
 		bg.AdultRowToMolokai();
 		//wake a child to row the boat back to Oahu
 		sleepMolokaiChild.wake();
 		
 		adultLock.release();
     }
-
-    static void childItinerary()
+    static void SampleItinerary()
+    static void ChildItinerary()
     {
+	// Please note that this isn't a valid solution (you can't fit
+	// all of them on the boat). Please also note that you may not
+	// have a single thread calculate a solution and then just play
+	// it back at the autograder -- you will be caught.
+	System.out.println("\n ***Everyone piles on the boat and goes to Molokai***");
+	bg.AdultRowToMolokai();
+	bg.ChildRideToMolokai();
+	bg.AdultRideToMolokai();
+	bg.ChildRideToMolokai();
 		//INITIALIZATION
 		boolean onMolokai = false;
 		boolean finalVoyage = false;
-		boolean adultsFinished = false;
+		boolean passenger;
 		
 		while(true)
 		{
+			passenger = false;
 			if(!onMolokai)
 			{
 				//if the boat isn't there or if an adult is going to use the boat next,
 				//then the child should sleep. No more than two children should ever be active
-				childLock.acquire();
+				childLock.aquire();
 				while(boatMolokai || adultTurn || countActiveChildren >= 2)
 				{
 					sleepOahuChild.sleep();
@@ -156,64 +171,63 @@ public class Boat
 				countActiveChildren++;
 				childLock.release();
 				
-				boatLock.acquire();
-				
-				adultLock.acquire();//Lock temporary because reliant on countOahuAdult
 				//If there are only 2 children left on the island, then this is the final voyage
 				//This check is done before sailing, to simulate only information known to people on the island
-				if(countOahuChild <= 2 && countOahuAdult <= 0)
+				if(countOahuChild <= 2 && countOahuAdults <= 0)
 					finalVoyage = true;
-				//Also check for if any adults left
-				if(countOahuAdult <= 0)
-					adultsFinished = true;
-				adultLock.release();
 				
-				//If there are zero children waiting on the boat, wait on the boat and sleep
+				boatlock.aquire();
+				//If there are zero children waiting on the boat...
 				if(countBoat == 0)
 				{
-					//Always will wait for a passenger, because there will always be 2 or more children
-					countBoat++;
-					sleepOahuChild.wake();
-					sleepOnBoat.sleep();
-					bg.ChildRowToMolokai();
+					//If the not the final child, wait on the boat and sleep
+					if(countOahuChild > 1)
+					{
+						countBoat++;
+						sleepOnBoat.sleep();
+					}
+					//If the final Child on the island, just row and finish the simulation
+					else
+					{
+						bg.ChildRowToMolokai();
+						boatLock.release();
+						finish.V();
+						break;
+					}
 				}
 				//If the second child on the boat, the child is now the passenger
 				//Wake the child that was waiting for a passenger
 				else
 				{
+					passenger = true;
 					countBoat++;
 					sleepOnBoat.wake();
-					bg.ChildRideToMolokai();
 				}
+				boatLock.release();
+				
+				//If there are still adults on the island, then they will take the boat next
+				if(countOahuAdult > 0)
+						adultTurn=true
 				
 				//Set counters and send messages that the two boat children are now in Molokai
 				countOahuChild--;
 				onMolokai = true;
-
-				//Changes values for next group to use the boat
-				childLock.acquire();
-				adultLock.acquire();
+				//Okay to decrement active children without lock, because the 
+				// while loop is still true with the boat now at Molokai.
 				boatMolokai = true;
 				countActiveChildren--;
-				//If there are still adults on the island, then they will take the boat next
-				if(!adultsFinished)
-						adultTurn=true;
-				adultLock.release();
-				childLock.release();
-				
-				boatLock.release();
+				//state that the child is going to Molokai, whether as a passenger or as a rower
+				if(passenger)
+					bg.ChildRideToMolokai();
+				else
+					bg.ChildRowToMolokai();
 				
 				//if the child is the last one off the boat, they will instead return back to Oahu
 				//otherwise they will sleep
-				molokaiLock.acquire();
+				molokaiLock.aquire();
 				countBoat--;
 				if(countBoat > 0)	
 				{
-					if(adultsFinished)
-					{
-						molokaiLock.release();
-						break;
-					}			
 					sleepMolokaiChild.sleep();
 				}
 				molokaiLock.release();
@@ -230,30 +244,23 @@ public class Boat
 			if(onMolokai)
 			{
 				//A child rows back to Oahu by themselves.
-				boatLock.acquire();
 				countOahuChild++;
-				boatLock.release();
-				
 				onMolokai = false;
-				
-				childLock.acquire();
-				adultLock.acquire();
-					boatMolokai = false;
-				childLock.release();
-				adultLock.release();
+				boatMolokai = false;
 				
 				bg.ChildRowToOahu();
 				
 				//If there are adults on  the island and still a child on Molokai, then the adult should go
 				//Otherwise wake a child to go to the island again
-				adultLock.acquire();//locked due to be reliant on countOahuAudlt and adultTurn
 				if(countOahuAdult > 0 && adultTurn)
 				{
 					sleepOahuAdult.wake();
 					sleepOahuChild.sleep();
 				}
-				adultLock.release();
+				else
+					sleepOahuChild.wake();
 			}
 		}
     }
+    
 }
