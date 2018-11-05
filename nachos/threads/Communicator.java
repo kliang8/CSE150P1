@@ -76,9 +76,10 @@ public class Communicator {
     	listenerCount++;
         // Wait for thread to speak then return word that is passed.
     	if (speakerCount == 0) {
-    		cSpeaker.notify();
     		cListener.sleep();
-    	}
+    	} else {
+                cSpeaker.wake();
+        }
         // Save word and Reset the word
     	msg = words.removeLast();
         //this.word = 0;
