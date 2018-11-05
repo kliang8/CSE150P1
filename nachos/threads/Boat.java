@@ -59,13 +59,12 @@ public class Boat
 		
 		//Initialization of locks and conditions
 		oahuLock = new Lock();
-		boatLock = new Lock();
 		molokaiLock = new Lock();
 		
 		sleepOahuAdult = new Condition2(oahuLock);
 		sleepOahuChild = new Condition2(oahuLock);
 		sleepMolokaiChild = new Condition2(molokaiLock);
-		sleepOnBoat = new Condition2(boatLock);
+		sleepOnBoat = new Condition2(oahuLock);
 		
 		Semaphore finish = new Semaphore(0);
 		
@@ -147,7 +146,6 @@ public class Boat
 			{
 				sleepOahuChild.sleep();
 			}
-			countActiveChildren++;
 			
 			//If there are only 2 children left on the island, then this is the final voyage
 			//This check is done before sailing, to simulate only information known to people on the island
@@ -158,11 +156,10 @@ public class Boat
 				adultsFinished = true;
 			
 			//If there are zero children waiting on the boat, wait on the boat and sleep
-			boatLock.acquire();
-			if(countBoat == 0)
+			if(countActiveChildren == 0)
 			{
 				//Always will wait for a passenger, because there will always be 2 or more children
-				countBoat++;
+				countActiveChildren++;
 				sleepOahuChild.wake();
 				sleepOnBoat.sleep();
 				bg.ChildRowToMolokai();
@@ -171,11 +168,11 @@ public class Boat
 			//Wake the child that was waiting for a passenger
 			else
 			{
+				countActiveChildren++;
 				countBoat++;
 				sleepOnBoat.wake();
 				bg.ChildRideToMolokai();
 			}
-			boatLock.release();
 			
 			//Set counters and send messages that the two boat children are now in Molokai
 			countOahuChild--;
@@ -191,22 +188,19 @@ public class Boat
 			//if the child is the last one off the boat, they will instead return back to Oahu
 			//otherwise they will sleep
 			molokaiLock.acquire();
-			boatLock.acquire();
-			countBoat--;
-			if(countBoat > 0)	
+			
+			if(countBoat == 0)	
 			{
-				boatLock.release();
+				countBoat++;
 				if(adultsFinished)
 				{
 					molokaiLock.release();
 					break;
 				}
 				sleepMolokaiChild.sleep();
-				
 			}
-			else
-				boatLock.release();
 			
+			countBoat = 0;
 
 			//finishes the simulation if no one was on the island after leaving
 			//This is done after the lock check to make sure both the row and ride messages were sent
