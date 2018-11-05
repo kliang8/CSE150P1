@@ -19,7 +19,8 @@ public class Communicator {
         private int speakerCount = 0;
         private int listenerCount = 0;
 
-        private int word = 0;
+        private LinkedList<Integer> words;
+        //private int word = 0;
 
     /**
      * Allocate a new communicator.
@@ -43,15 +44,17 @@ public class Communicator {
     public void speak(int word) {
     	// Getting the lock
     	lock.acquire();
+        //Transfer word to listener
+        words.add(word);
     	// Increasing number of Speakers
     	speakerCount++;
     	//Wait for thread to listen for this communicator
-    	while (this.word != 0 ||  listenerCount < 1)
-    		cSpeaker.sleep();
-    	//Transfer word to listener
-    	this.word = word;
-        cListener.wakeAll();
-        speakerCount--;
+    	if (listenerCount == 0) {
+                cSpeaker.sleep();
+        } else {
+                cListener.wake();
+        }
+        cListener--;
     	lock.release();
     }
 
@@ -68,14 +71,14 @@ public class Communicator {
         // Increasing number of Listeners
     	listenerCount++;
         // Wait for thread to speak then return word that is passed.
-    	while(this.word == 0) {
+    	if (speakerCount == 0) {
     		cSpeaker.notify();
     		cListener.sleep();
     	}
         // Save word and Reset the word
-    	msg = this.word;
-        this.word = 0;
-    	listenerCount--;
+    	msg = word.removeLast();
+        //this.word = 0;
+    	speakerCount--;
     	lock.release();
         // Return the word
 	return msg;
