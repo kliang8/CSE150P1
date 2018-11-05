@@ -240,7 +240,7 @@ public class Boat
 				
 				//If there are adults on  the island and still a child on Molokai, then the adult should go
 				//Otherwise wake a child to go to the island again
-				if(countOahuAdult > 0 && !adultTurn)
+				if(countOahuAdult > 0 && adultTurn)
 				{
 					sleepOahuAdult.wake();
 					sleepOahuChild.sleep();
