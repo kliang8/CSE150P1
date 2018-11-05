@@ -114,7 +114,6 @@ public class Boat
 			if(!boatMolokai && !adultTurn)
 			{
 				sleepOahuChild.wake();
-				sleepOahuChild.wake();
 			}*/
 			sleepOahuAdult.sleep();
 		}
@@ -122,10 +121,13 @@ public class Boat
 
 		//The adults will know that there are no longer any children on Molokai, 
 		//as the returning boat is the second child
-		adultTurn = false; 
+		childLock.acquire();
+		adultTurn = false;
+		boatMolokai = true;
+		childLock.release();
 		
 		countOahuAdult--;
-		boatMolokai = true;
+		
 		bg.AdultRowToMolokai();
 		//wake a child to row the boat back to Oahu
 		sleepMolokaiChild.wake();
@@ -138,12 +140,10 @@ public class Boat
 		//INITIALIZATION
 		boolean onMolokai = false;
 		boolean finalVoyage = false;
-		boolean passenger;
 		boolean adultsFinished = false;
 		
 		while(true)
 		{
-			passenger = false;
 			if(!onMolokai)
 			{
 				//if the boat isn't there or if an adult is going to use the boat next,
@@ -172,33 +172,33 @@ public class Boat
 					countBoat++;
 					sleepOahuChild.wake();
 					sleepOnBoat.sleep();
+					bg.ChildRowToMolokai();
 				}
 				//If the second child on the boat, the child is now the passenger
 				//Wake the child that was waiting for a passenger
 				else
 				{
-					passenger = true;
 					countBoat++;
 					sleepOnBoat.wake();
+					bg.ChildRideToMolokai();
 				}
-				boatLock.release();
-				
-				//If there are still adults on the island, then they will take the boat next
-				if(!adultsFinished)
-						adultTurn=true;
 				
 				//Set counters and send messages that the two boat children are now in Molokai
 				countOahuChild--;
 				onMolokai = true;
-				//Okay to decrement active children without lock, because the 
-				// while loop is still true with the boat now at Molokai.
+
+				//Changes values for next group to use the boat
+				childLock.acquire();
+				adultLock.acquire();
 				boatMolokai = true;
 				countActiveChildren--;
-				//state that the child is going to Molokai, whether as a passenger or as a rower
-				if(passenger)
-					bg.ChildRideToMolokai();
-				else
-					bg.ChildRowToMolokai();
+				//If there are still adults on the island, then they will take the boat next
+				if(!adultsFinished)
+						adultTurn=true;
+				adultLock.release();
+				childLock.release();
+				
+				boatLock.release();
 				
 				//if the child is the last one off the boat, they will instead return back to Oahu
 				//otherwise they will sleep
@@ -229,7 +229,12 @@ public class Boat
 				//A child rows back to Oahu by themselves.
 				countOahuChild++;
 				onMolokai = false;
-				boatMolokai = false;
+				
+				childLock.acquire();
+				adultLock.acquire();
+					boatMolokai = false;
+				childLock.release();
+				adultLock.release();
 				
 				bg.ChildRowToOahu();
 				
