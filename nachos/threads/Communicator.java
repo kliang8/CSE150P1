@@ -26,8 +26,8 @@ public class Communicator {
      */
     public Communicator() {
            lock = new Lock();
-           cSpeaker =  new  Condition2(lock);
-           cListener =  new  Condition2(lock);
+           cSpeaker = new Condition2(lock);
+           cListener = new Condition2(lock);
     }
 
     /**
@@ -46,7 +46,7 @@ public class Communicator {
     	// Increasing number of Speakers
     	speakerCount++;
     	//Wait for thread to listen for this communicator
-    	while (this.word != 0 &&  listenerCount < 1)
+    	while (this.word != 0 ||  listenerCount < 1)
     		cSpeaker.sleep();
     	//Transfer word to listener
     	this.word = word;
