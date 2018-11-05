@@ -162,7 +162,7 @@ public class Boat
 				countActiveChildren++;
 				sleepOahuChild.wake();
 				sleepOnBoat.sleep();
-				bg.ChildRowToMolokai();
+				bg.ChildRideToMolokai();
 			}
 			//If the second child on the boat, the child is now the passenger
 			//Wake the child that was waiting for a passenger
@@ -171,7 +171,7 @@ public class Boat
 				countActiveChildren++;
 				countBoat++;
 				sleepOnBoat.wake();
-				bg.ChildRideToMolokai();
+				bg.ChildRowToMolokai();
 			}
 			
 			//Set counters and send messages that the two boat children are now in Molokai
