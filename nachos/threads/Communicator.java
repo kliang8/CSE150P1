@@ -42,6 +42,7 @@ public class Communicator {
      * @param	word	the integer to transfer.
      */
     public void speak(int word) {
+        boolean state = Machine.interrupt().disable();
     	// Getting the lock
     	lock.acquire();
         //Transfer word to listener
@@ -56,6 +57,7 @@ public class Communicator {
         }
         listenerCount--;
     	lock.release();
+        Machine.interrupt().restore(state);
     }
 
     /**
@@ -65,6 +67,7 @@ public class Communicator {
      * @return	the integer transferred.
      */
     public int listen() {
+        boolean state = Machine.interrupt().disable();
     	int msg;
         // Getting the lock
     	lock.acquire();
@@ -80,6 +83,7 @@ public class Communicator {
         //this.word = 0;
     	speakerCount--;
     	lock.release();
+        Machine.interrupt().restore(state);
         // Return the word
 	return msg;
     }
