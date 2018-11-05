@@ -220,7 +220,6 @@ public class Boat
 			molokaiLock.release();
 			
 			oahuLock.acquire();
-			countOahuChild++;
 			//If there are adults on  the island and still a child on Molokai, then the adult should go
 			//Otherwise wake a child to go to the island again
 			if(countOahuAdult > 0)
