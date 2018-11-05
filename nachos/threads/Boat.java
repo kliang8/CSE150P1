@@ -195,12 +195,12 @@ public class Boat
 			countBoat--;
 			if(countBoat > 0)	
 			{
+				boatLock.release();
 				if(adultsFinished)
 				{
 					molokaiLock.release();
 					break;
 				}
-				boatLock.release();
 				sleepMolokaiChild.sleep();
 				
 			}
