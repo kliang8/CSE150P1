@@ -213,10 +213,11 @@ public class Boat
 			//A child rows back to Oahu by themselves.
 			boatMolokai = false;
 			bg.ChildRowToOahu();
-			molokaiLock.release();
 			
 			oahuLock.acquire();
 			countOahuChild++;
+			oahuLock.release();
+			molokaiLock.release();
 			
 			//If there are adults on  the island and still a child on Molokai, then the adult should go
 			//Otherwise wake a child to go to the island again
@@ -224,7 +225,7 @@ public class Boat
 			{
 				sleepOahuAdult.wake();
 			}
-			oahuLock.release();
+
 		}
     }
 }
