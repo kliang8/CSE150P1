@@ -22,7 +22,7 @@ public class Boat
 	static int countActiveChildren;
 	static int countBoat;
 	
-	static Semaphore finish;
+	static Semaphore finishTest;
     
     public static void selfTest()
     {
@@ -66,7 +66,7 @@ public class Boat
 		sleepMolokaiChild = new Condition2(molokaiLock);
 		sleepOnBoat = new Condition2(oahuLock);
 		
-		Semaphore finish = new Semaphore(0);
+		finishTest = new Semaphore(0);
 		
 		
 		Runnable a = new Runnable() {
@@ -206,7 +206,7 @@ public class Boat
 			//This is done after the lock check to make sure both the row and ride messages were sent
 			if(finalVoyage)	
 			{
-				finish.V();
+				finishTest.V();
 				break;
 			}
 			
