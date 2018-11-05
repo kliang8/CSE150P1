@@ -19,7 +19,7 @@ public class Communicator {
         private int speakerCount = 0;
         private int listenerCount = 0;
 
-        private LinkedList<Integer> words;
+        private LinkedList<Integer> words = new LinkedList();
         //private int word = 0;
 
     /**
