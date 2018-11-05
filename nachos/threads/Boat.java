@@ -121,7 +121,7 @@ public class Boat
 
 		//The adults will know that there are no longer any children on Molokai, 
 		//as the returning boat is the second child
-		childLock.acquire();
+		childLock.acquire(); // locked as
 		adultTurn = false;
 		boatMolokai = true;
 		childLock.release();
@@ -156,6 +156,9 @@ public class Boat
 				countActiveChildren++;
 				childLock.release();
 				
+				boatLock.acquire();
+				
+				adultLock.acquire();//Lock temporary because reliant on countOahuAdult
 				//If there are only 2 children left on the island, then this is the final voyage
 				//This check is done before sailing, to simulate only information known to people on the island
 				if(countOahuChild <= 2 && countOahuAdult <= 0)
@@ -163,8 +166,8 @@ public class Boat
 				//Also check for if any adults left
 				if(countOahuAdult <= 0)
 					adultsFinished = true;
+				adultLock.release();
 				
-				boatLock.acquire();
 				//If there are zero children waiting on the boat, wait on the boat and sleep
 				if(countBoat == 0)
 				{
@@ -227,7 +230,10 @@ public class Boat
 			if(onMolokai)
 			{
 				//A child rows back to Oahu by themselves.
+				boatLock.acquire();
 				countOahuChild++;
+				boatLock.release();
+				
 				onMolokai = false;
 				
 				childLock.acquire();
@@ -240,11 +246,13 @@ public class Boat
 				
 				//If there are adults on  the island and still a child on Molokai, then the adult should go
 				//Otherwise wake a child to go to the island again
+				adultLock.acquire();//locked due to be reliant on countOahuAudlt and adultTurn
 				if(countOahuAdult > 0 && adultTurn)
 				{
 					sleepOahuAdult.wake();
 					sleepOahuChild.sleep();
 				}
+				adultLock.release();
 			}
 		}
     }
