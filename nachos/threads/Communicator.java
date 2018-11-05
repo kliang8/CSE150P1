@@ -1,5 +1,5 @@
 package nachos.threads;
-
+import java.util.LinkedList;
 import nachos.machine.*;
 
 /**
@@ -54,7 +54,7 @@ public class Communicator {
         } else {
                 cListener.wake();
         }
-        cListener--;
+        listenerCount--;
     	lock.release();
     }
 
@@ -76,7 +76,7 @@ public class Communicator {
     		cListener.sleep();
     	}
         // Save word and Reset the word
-    	msg = word.removeLast();
+    	msg = words.removeLast();
         //this.word = 0;
     	speakerCount--;
     	lock.release();
