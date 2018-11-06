@@ -1,6 +1,7 @@
 package nachos.threads;
-import java.util.LinkedList;
 import nachos.machine.*;
+import java.util.*;
+
 
 /**
  * A <i>communicator</i> allows threads to synchronously exchange 32-bit
@@ -20,18 +21,18 @@ public class Communicator {
 
         //private LinkedList<Integer> words;
         private boolean validMessage;
-        private int message;
+        private int word = 0;
 
     /**
      * Allocate a new communicator.
      */
     public Communicator() {
-           lock = new Lock();
+           this.lock = new Lock();
 
-           cSpeaker = new Condition2(lock);
-           cListener = new Condition2(lock);
+           this.cSpeaker = new Condition2(lock);
+           this.cListener = new Condition2(lock);
 
-           validMessage = false;
+           this.validMessage = false;
 
            //words = new LinkedList<Integer>();
     }
@@ -59,9 +60,11 @@ public class Communicator {
         // } else {
         //         cListener.wake();
         // }
-        while (validMessage || listenerCount == 0) cSpeaker.sleep();
+        while (validMessage || listenerCount == 0) {
+        	cSpeaker.sleep();
+        }
 
-        this.message = word;
+        this.word = word;
         validMessage = true;
         cListener.wakeAll();
         speakerCount--;
@@ -75,7 +78,6 @@ public class Communicator {
      * @return	the integer transferred.
      */
     public int listen() {
-    	int msg;
         // Getting the lock
     	lock.acquire();
         // Increasing number of Listeners
@@ -86,17 +88,17 @@ public class Communicator {
     	// } else {
         //         cSpeaker.wake();
         // }
-        while(validMessage == false || speakerCount == 0) {
+        while(validMessage == false) {
     		cSpeaker.wakeAll();
     		cListener.sleep();
     	}
         // Save word and Reset the word
-    	msg = message;
+    	int word = this.word;
         validMessage = false;
         //this.word = 0;
     	listenerCount--;
     	lock.release();
         // Return the word
-	return msg;
+    	return word;
     }
 }
