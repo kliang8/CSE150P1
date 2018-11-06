@@ -187,7 +187,7 @@ public class Boat
 			if(countBoat == 0)	
 			{
 				countBoat++;
-				if(adultsFinished)
+				if(countOahuAdult ==0)
 				{
 					molokaiLock.release();
 					break;
