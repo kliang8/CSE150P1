@@ -49,18 +49,12 @@ public class Communicator {
     public void speak(int word) {
         // Getting the lock
     	lock.acquire();
-        //Transfer word to listener
-        //words.add(word);
     	// Increasing number of Speakers
     	speakerCount++;
-    	//Wait for thread to listen for this communicator
-    	// if (listenerCount == 0) {
-        //         cSpeaker.sleep();
-        // } else {
-        //         cListener.wake();
-        // }
-        while (validMessage || listenerCount == 0) cSpeaker.sleep();
 
+        while (validMessage || listenerCount == 0) cSpeaker.sleep();
+        //Transfer word to listener
+        //words.add(word);
         this.message = word;
         validMessage = true;
         cListener.wake();
