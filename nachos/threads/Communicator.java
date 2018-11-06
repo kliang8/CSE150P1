@@ -15,6 +15,7 @@ public class Communicator {
         private Condition2 cSpeaker;
         private Condition2 cListener;
 
+
         private int speakerCount = 0;
         private int listenerCount = 0;
 
@@ -81,14 +82,15 @@ public class Communicator {
         // }
         while(validMessage == false) {
                 cSpeaker.wake();
-    		cListener.sleep();
+                cListener.sleep();
     	}
         // Save word and Reset the word
     	msg = message;
         validMessage = false;
         //this.word = 0;
-    	listenerCount--;
-        cSpeaker.wake();
+        listenerCount--;
+
+        //cSpeaker.wake();
         lock.release();
         // Return the word
 	return msg;
