@@ -52,7 +52,7 @@ public class Communicator {
     	// Increasing number of Speakers
     	speakerCount++;
 
-        while (validMessage || listenerCount == 0) cSpeaker.sleep();
+        while (validMessage ||  listenerCount < 1) cSpeaker.sleep();
         //Transfer word to listener
         //words.add(word);
         this.message = word;
@@ -82,15 +82,14 @@ public class Communicator {
         // }
         while(validMessage == false) {
                 cSpeaker.wake();
-                cListener.sleep();
+    		cListener.sleep();
     	}
         // Save word and Reset the word
     	msg = message;
         validMessage = false;
-        //this.word = 0;
-        listenerCount--;
-
-        //cSpeaker.wake();
+        cSpeaker.wake();
+    	listenerCount--;
+        // if (speakerCount >  0) cSpeaker.wake();
         lock.release();
         // Return the word
 	return msg;
