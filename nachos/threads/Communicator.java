@@ -87,9 +87,8 @@ public class Communicator {
         // Save word and Reset the word
     	msg = message;
         validMessage = false;
-        cSpeaker.wake();
     	listenerCount--;
-        // if (speakerCount >  0) cSpeaker.wake();
+        if (speakerCount >  0) cSpeaker.wake();
         lock.release();
         // Return the word
 	return msg;
