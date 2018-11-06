@@ -32,7 +32,6 @@ public class Communicator {
            cListener = new Condition2(lock);
 
            validMessage = false;
-
            //words = new LinkedList<Integer>();
     }
 
@@ -90,9 +89,7 @@ public class Communicator {
         //this.word = 0;
     	listenerCount--;
     	lock.release();
-        if (speakerCount > 0) {
-                cSpeaker.wake();
-        }
+        cSpeaker.wake();
         // Return the word
 	return msg;
     }
