@@ -211,10 +211,10 @@ public class Boat
 			}
 			
 			//A child rows back to Oahu by themselves.
-			boatMolokai = false;
 			bg.ChildRowToOahu();
 			oahuLock.acquire();
 			countOahuChild++;
+			boatMolokai = false;
 			oahuLock.release();
 			
 			molokaiLock.release();
