@@ -63,7 +63,7 @@ public class Communicator {
 
         this.message = word;
         validMessage = true;
-        cListener.wakeAll();
+        cListener.wake();
         speakerCount--;
     	lock.release();
     }
@@ -86,8 +86,8 @@ public class Communicator {
     	// } else {
         //         cSpeaker.wake();
         // }
-        while(validMessage == false || speakerCount == 0) {
-    		cSpeaker.wakeAll();
+        while(validMessage == false) {
+                if (speakerCount > 0) cSpeaker.wakeAll();
     		cListener.sleep();
     	}
         // Save word and Reset the word
@@ -96,6 +96,9 @@ public class Communicator {
         //this.word = 0;
     	listenerCount--;
     	lock.release();
+        if (speakerCount > 0) {
+                cSpeaker.wake();
+        }
         // Return the word
 	return msg;
     }
