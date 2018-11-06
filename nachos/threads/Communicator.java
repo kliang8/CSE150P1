@@ -28,11 +28,11 @@ public class Communicator {
     public Communicator() {
            lock = new Lock();
 
-           cSpeaker =  new  Condition2(lock);
-           cListener =  new  Condition2(lock);
+           cSpeaker = new Condition2(lock);
+           cListener = new Condition2(lock);
 
            validMessage = false;
-           message = 0;
+
            //words = new LinkedList<Integer>();
     }
 
@@ -48,7 +48,6 @@ public class Communicator {
      */
     public void speak(int word) {
         // Getting the lock
-        //boolean state = Machine.interrupt().disable();
     	lock.acquire();
         //Transfer word to listener
         //words.add(word);
@@ -60,15 +59,13 @@ public class Communicator {
         // } else {
         //         cListener.wake();
         // }
-        while (validMessage && listenerCount < 1) cSpeaker.sleep();
+        while (validMessage || listenerCount == 0) cSpeaker.sleep();
 
-        message = word;
-        cListener.wakeAll();
+        this.message = word;
         validMessage = true;
+        cListener.wakeAll();
         speakerCount--;
-
     	lock.release();
-        //Machine.interrupt().restore(state);
     }
 
     /**
@@ -80,7 +77,6 @@ public class Communicator {
     public int listen() {
     	int msg;
         // Getting the lock
-        //boolean state = Machine.interrupt().disable();
     	lock.acquire();
         // Increasing number of Listeners
     	listenerCount++;
@@ -90,18 +86,16 @@ public class Communicator {
     	// } else {
         //         cSpeaker.wake();
         // }
-        while(validMessage == false && speakerCount < 1) {
-    		cSpeaker.notify();
+        while(validMessage == false || speakerCount == 0) {
+    		cSpeaker.wakeAll();
     		cListener.sleep();
     	}
         // Save word and Reset the word
     	msg = message;
-        message = 0;
         validMessage = false;
         //this.word = 0;
     	listenerCount--;
     	lock.release();
-        //Machine.interrupt().restore(state);
         // Return the word
 	return msg;
     }
