@@ -165,7 +165,6 @@ public class Boat
 			else
 			{
 				countActiveChildren++;
-				countBoat++;
 				sleepOnBoat.wake();
 				bg.ChildRowToMolokai();
 			}
