@@ -80,7 +80,7 @@ public class Communicator {
         //         cSpeaker.wake();
         // }
         while(validMessage == false) {
-                if (speakerCount > 0) cSpeaker.wakeAll();
+                cSpeaker.wake();
     		cListener.sleep();
     	}
         // Save word and Reset the word
