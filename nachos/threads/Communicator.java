@@ -48,7 +48,7 @@ public class Communicator {
      */
     public void speak(int word) {
         // Getting the lock
-        boolean state = Machine.interrupt().disable();
+        //boolean state = Machine.interrupt().disable();
     	lock.acquire();
         //Transfer word to listener
         //words.add(word);
@@ -60,7 +60,7 @@ public class Communicator {
         // } else {
         //         cListener.wake();
         // }
-        while (validMessage &&  listenerCount < 1) cSpeaker.sleep();
+        while (validMessage && listenerCount < 1) cSpeaker.sleep();
 
         message = word;
         cListener.wakeAll();
@@ -68,7 +68,7 @@ public class Communicator {
         speakerCount--;
 
     	lock.release();
-        Machine.interrupt().restore(state);
+        //Machine.interrupt().restore(state);
     }
 
     /**
@@ -80,7 +80,7 @@ public class Communicator {
     public int listen() {
     	int msg;
         // Getting the lock
-        boolean state = Machine.interrupt().disable();
+        //boolean state = Machine.interrupt().disable();
     	lock.acquire();
         // Increasing number of Listeners
     	listenerCount++;
@@ -90,7 +90,7 @@ public class Communicator {
     	// } else {
         //         cSpeaker.wake();
         // }
-        while(validMessage == false) {
+        while(validMessage == false && speakerCount < 1) {
     		cSpeaker.notify();
     		cListener.sleep();
     	}
@@ -101,7 +101,7 @@ public class Communicator {
         //this.word = 0;
     	listenerCount--;
     	lock.release();
-        Machine.interrupt().restore(state);
+        //Machine.interrupt().restore(state);
         // Return the word
 	return msg;
     }
