@@ -88,8 +88,8 @@ public class Communicator {
         validMessage = false;
         //this.word = 0;
     	listenerCount--;
-    	lock.release();
         cSpeaker.wake();
+        lock.release();
         // Return the word
 	return msg;
     }
