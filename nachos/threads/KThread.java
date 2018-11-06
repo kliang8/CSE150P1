@@ -49,7 +49,7 @@ public class KThread {
 	else {
 	    readyQueue = ThreadedKernel.scheduler.newThreadQueue(false);
 	    readyQueue.acquire(this);	    
-
+	    joinQueue = ThreadedKernel.scheduler.newThreadQueue(false);
 	    currentThread = this;
 	    tcb = TCB.currentTCB();
 	    name = "main";
@@ -183,26 +183,24 @@ public class KThread {
      */
     public static void finish() {
 	Lib.debug(dbgThread, "Finishing thread: " + currentThread.toString());
-	
 	Machine.interrupt().disable();
-
 	Machine.autoGrader().finishingCurrentThread();
 
+	// Added handling of the join queue (introduced for KThread.join())
+	// If the current thread has a join queue and the join queue has a thread on it,
+	// ready that thread
+		
+	if (currentThread.joinQueue != null && currentThread.joinQueue.nextThread() != null) {
+		currentThread.joinQueue.nextThread().ready();
+	}
+	
 	Lib.assertTrue(toBeDestroyed == null);
 	toBeDestroyed = currentThread;
 
 
 	currentThread.status = statusFinished;
 	
-	// Added handling of the join queue (introduced for KThread.join())
-	// If the current thread has a join queue and the join queue has a thread on it,
-	// ready that thread
 	
-	if (currentThread.joinQueue != null && currentThread.joinQueue.nextThread() != null) {
-		currentThread.joinQueue.nextThread().ready();
-	}
-	    
-	    
 	sleep();
     }
 
@@ -282,6 +280,7 @@ public class KThread {
      * thread.
      */
     public void join() {
+    
 	Lib.debug(dbgThread, "Joining to thread: " + toString());
 	Lib.assertTrue(this != currentThread);
 
@@ -301,7 +300,7 @@ public class KThread {
 	}
 	// Restore state before interrupt
 	Machine.interrupt().restore(intStatus);
-
+	
     }
 
     /**
@@ -469,6 +468,5 @@ public class KThread {
     private static KThread currentThread = null;
     private static KThread toBeDestroyed = null;
     private static KThread idleThread = null;
-	
-    ThreadQueue joinQueue = ThreadedKernel.scheduler.newThreadQueue(true);
+    private static ThreadQueue joinQueue = null;
 }
