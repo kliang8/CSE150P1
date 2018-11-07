@@ -14,12 +14,10 @@ public class Communicator {
 
         private Condition2 cSpeaker;
         private Condition2 cListener;
-
+        private Condition2 cReady;
 
         private int speakerCount = 0;
-        private int listenerCount = 0;
 
-        //private LinkedList<Integer> words;
         private boolean validMessage;
         private int message;
 
@@ -31,9 +29,9 @@ public class Communicator {
 
            cSpeaker = new Condition2(lock);
            cListener = new Condition2(lock);
+           cReady = new Condition2(lock);
 
            validMessage = false;
-           //words = new LinkedList<Integer>();
     }
 
     /**
@@ -47,19 +45,26 @@ public class Communicator {
      * @param	word	the integer to transfer.
      */
     public void speak(int word) {
-        // Getting the lock
-    	lock.acquire();
-    	// Increasing number of Speakers
-    	speakerCount++;
+            // Getting the lock
+            lock.acquire();
+            // Increasing number of Speakers
+            try {
+                    while (validMessage || listenerCount < 1) {
+                            cListener.wake();
+                            cSpeaker.sleep();
+                    }
+                    //Transfer word to listener
+                    //words.add(word);
+                    this.message = word;
+                    validMessage = true;
+                    cListener.wakeAll();
 
-        while (validMessage ||  listenerCount < 1) cSpeaker.sleep();
-        //Transfer word to listener
-        //words.add(word);
-        this.message = word;
-        validMessage = true;
-        cListener.wake();
-        speakerCount--;
-    	lock.release();
+                    while (validMessage) {
+                            cReady.sleep();
+                    }
+            } finally {
+                    lock.release();
+            }
     }
 
     /**
@@ -72,24 +77,24 @@ public class Communicator {
     	int msg;
         // Getting the lock
     	lock.acquire();
-        // Increasing number of Listeners
-    	listenerCount++;
-        // Wait for thread to speak then return word that is passed.
-    	// if (speakerCount == 0) {
-    	// 	cListener.sleep();
-    	// } else {
-        //         cSpeaker.wake();
-        // }
-        while(validMessage == false) {
-                if (speakerCount >  0) cSpeaker.wake();
-    		cListener.sleep();
-    	}
-        // Save word and Reset the word
-    	msg = message;
-        validMessage = false;
-    	listenerCount--;
-        if (speakerCount >  0) cSpeaker.wake();
-        lock.release();
+        try {
+                // Increasing number of Listeners
+            	listenerCount++;
+
+                while(!validMessage) {
+                        cSpeaker.wakeAll();
+            		cListener.sleep();
+            	}
+                // Save word and Reset the word
+            	msg = message;
+                validMessage = false;
+            	listenerCount--;
+
+                cReady.wakeAll();
+        } finally {
+                lock.release();
+        }
+
         // Return the word
 	return msg;
     }
