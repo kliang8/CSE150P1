@@ -47,18 +47,18 @@ public class Communicator {
     public void speak(int word) {
             // Getting the lock
             lock.acquire();
-            // Increasing number of Speakers
             try {
-                    while (validMessage || listenerCount < 1) {
+                    // Making sure word is not valid or no listeners before going to sleep
+                    while (validMessage || listenerCount == 0) {
                             cListener.wake();
                             cSpeaker.sleep();
                     }
                     //Transfer word to listener
-                    //words.add(word);
                     this.message = word;
                     validMessage = true;
                     cListener.wakeAll();
 
+                    // Since next thread might not be the one we want we wait for our corresponding one
                     while (validMessage) {
                             cReady.sleep();
                     }
@@ -86,7 +86,7 @@ public class Communicator {
             		cListener.sleep();
             	}
                 // Save word and Reset the word
-            	msg = message;
+            	msg = this.message;
                 validMessage = false;
             	listenerCount--;
 
