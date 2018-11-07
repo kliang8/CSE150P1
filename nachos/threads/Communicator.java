@@ -16,7 +16,7 @@ public class Communicator {
         private Condition2 cListener;
         private Condition2 cReady;
 
-        private int speakerCount = 0;
+        private int listenerCount;
 
         private boolean validMessage;
         private int message;
@@ -26,7 +26,7 @@ public class Communicator {
      */
     public Communicator() {
            lock = new Lock();
-
+           listenerCount = 0;
            cSpeaker = new Condition2(lock);
            cListener = new Condition2(lock);
            cReady = new Condition2(lock);
@@ -47,6 +47,7 @@ public class Communicator {
     public void speak(int word) {
             // Getting the lock
             lock.acquire();
+            //Ensuring we release the lock after running method
             try {
                     // Making sure word is not valid or no listeners before going to sleep
                     while (validMessage || listenerCount == 0) {
@@ -59,9 +60,7 @@ public class Communicator {
                     cListener.wakeAll();
 
                     // Since next thread might not be the one we want we wait for our corresponding one
-                    while (validMessage) {
-                            cReady.sleep();
-                    }
+                    while (validMessage) cReady.sleep();
             } finally {
                     lock.release();
             }
@@ -77,6 +76,7 @@ public class Communicator {
     	int msg;
         // Getting the lock
     	lock.acquire();
+        // Try to ensure release of lock after code runs
         try {
                 // Increasing number of Listeners
             	listenerCount++;
