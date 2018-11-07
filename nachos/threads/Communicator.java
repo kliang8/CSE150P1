@@ -10,28 +10,26 @@ import nachos.machine.*;
  * threads can be paired off at this point.
  */
 public class Communicator {
+
         private Lock lock;
 
         private Condition2 cSpeaker;
         private Condition2 cListener;
-        private Condition2 cReady;
 
-        private int listenerCount;
+        private int speakerCount = 0;
+        private int listenerCount = 0;
 
-        private boolean validMessage;
-        private int message;
+        private LinkedList<Integer> words;
+        //private int word = 0;
 
     /**
      * Allocate a new communicator.
      */
     public Communicator() {
            lock = new Lock();
-           listenerCount = 0;
-           cSpeaker = new Condition2(lock);
-           cListener = new Condition2(lock);
-           cReady = new Condition2(lock);
-
-           validMessage = false;
+           words = new LinkedList<Integer>();
+           cSpeaker =  new  Condition2(lock);
+           cListener =  new  Condition2(lock);
     }
 
     /**
@@ -45,25 +43,22 @@ public class Communicator {
      * @param	word	the integer to transfer.
      */
     public void speak(int word) {
-            // Getting the lock
-            lock.acquire();
-            //Ensuring we release the lock after running method
-            try {
-                    // Making sure word is not valid or no listeners before going to sleep
-                    while (validMessage || listenerCount == 0) {
-                            cListener.wake();
-                            cSpeaker.sleep();
-                    }
-                    //Transfer word to listener
-                    this.message = word;
-                    validMessage = true;
-                    cListener.wakeAll();
-
-                    // Since next thread might not be the one we want we wait for our corresponding one
-                    while (validMessage) cReady.sleep();
-            } finally {
-                    lock.release();
-            }
+        boolean state = Machine.interrupt().disable();
+    	// Getting the lock
+    	lock.acquire();
+        //Transfer word to listener
+        words.add(word);
+    	// Increasing number of Speakers
+    	speakerCount++;
+    	//Wait for thread to listen for this communicator
+    	if (listenerCount == 0) {
+                cSpeaker.sleep();
+        } else {
+                cListener.wake();
+        }
+        listenerCount--;
+    	lock.release();
+        Machine.interrupt().restore(state);
     }
 
     /**
@@ -73,28 +68,24 @@ public class Communicator {
      * @return	the integer transferred.
      */
     public int listen() {
+        boolean state = Machine.interrupt().disable();
     	int msg;
         // Getting the lock
     	lock.acquire();
-        // Try to ensure release of lock after code runs
-        try {
-                // Increasing number of Listeners
-            	listenerCount++;
-
-                while(!validMessage) {
-                        cSpeaker.wakeAll();
-            		cListener.sleep();
-            	}
-                // Save word and Reset the word
-            	msg = this.message;
-                validMessage = false;
-            	listenerCount--;
-
-                cReady.wakeAll();
-        } finally {
-                lock.release();
+        // Increasing number of Listeners
+    	listenerCount++;
+        // Wait for thread to speak then return word that is passed.
+    	if (speakerCount == 0) {
+    		cListener.sleep();
+    	} else {
+                cSpeaker.wake();
         }
-
+        // Save word and Reset the word
+    	msg = words.removeLast();
+        //this.word = 0;
+    	speakerCount--;
+    	lock.release();
+        Machine.interrupt().restore(state);
         // Return the word
 	return msg;
     }
