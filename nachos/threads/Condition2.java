@@ -41,6 +41,7 @@ public class Condition2 {
         Lib.assertTrue(conditionLock.isHeldByCurrentThread());
         conditionLock.release();// Release lock
         boolean tmp = Machine.interrupt().disable();// Disable interrupts 
+	//waitQueue.waitForAccess(currentThread); //wait for thread access
         waitQueue.add(KThread.currentThread()); // Add currentThread to waitQueue
         KThread.currentThread().sleep(); // Put currentThread to sleep
         Machine.interrupt().restore(tmp);// Restore interrupts
@@ -53,8 +54,10 @@ public class Condition2 {
     public void wake() {
         Lib.assertTrue(conditionLock.isHeldByCurrentThread());
         boolean tmp = Machine.interrupt().disable();/// Disable interrupts
+	//if (waitQueue != null) //If waitQueue is not empty
         if(!waitQueue.isEmpty()){ // If waitQueue is not empty
             KThread x = waitQueue.removeFirst();// Get the first Thread in wait Queue
+		//KThread a = waitQueue.nextThread(); //get next thread
             x.ready(); // Ready the thread
         }
         Machine.interrupt().restore(tmp);// Restore interrupts
@@ -67,7 +70,9 @@ public class Condition2 {
     
     public void wakeAll() {
         Lib.assertTrue(conditionLock.isHeldByCurrentThread());
+	// While(!waitQueue.isEmpty()){ // If waitQueue is not empty
         while(waitQueue != null)// While waitQueue is not empty
+		//KThread tmp = waitQueue.nextThread();
             wake(); // Wake all asleep threads
     }
 
